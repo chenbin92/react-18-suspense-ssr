@@ -40,6 +40,7 @@ app.get(
   '/',
   handleErrors(async function(req, res) {
     await waitForWebpack();
+    console.log(req.url);
     render(req.url, res);
   })
 );

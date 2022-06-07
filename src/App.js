@@ -22,6 +22,7 @@ export default function App({assets}) {
     <Html assets={assets} title="Hello">
       <Suspense fallback={<Spinner />}>
         <ErrorBoundary FallbackComponent={Error}>
+           {/* Content Component */}
           <Content />
         </ErrorBoundary>
       </Suspense>
@@ -34,14 +35,18 @@ function Content() {
     <Layout>
       <NavBar />
       <aside className="sidebar">
+        {/* Sidebar Component */}
         <Suspense fallback={<Spinner />}>
           <Sidebar />
         </Suspense>
       </aside>
       <article className="post">
+         {/* Post Component */}
         <Suspense fallback={<Spinner />}>
           <Post />
         </Suspense>
+
+        {/* Comment Component */}
         <section className="comments">
           <h2>Comments</h2>
           <Suspense fallback={<Spinner />}>

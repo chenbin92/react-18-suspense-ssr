@@ -8,7 +8,7 @@
 
 import * as React from 'react';
 // import {renderToString} from 'react-dom/server';
-import {pipeToNodeWritable} from 'react-dom/server';
+import {renderToPipeableStream} from 'react-dom/server';
 import App from '../src/App';
 import {DataProvider} from '../src/data';
 import {API_DELAY, ABORT_DELAY} from './delays';
@@ -37,18 +37,19 @@ module.exports = function render(url, res) {
   });
   let didError = false;
   const data = createServerData();
-  const {startWriting, abort} = pipeToNodeWritable(
+  console.log({ data, assets });
+  const stream = renderToPipeableStream(
     <DataProvider data={data}>
       <App assets={assets} />
     </DataProvider>,
-    res,
     {
-      onReadyToStream() {
+      bootstrapScripts: [assets["main.js"]],
+      onShellReady() {
         // If something errored before we started streaming, we set the error code appropriately.
         res.statusCode = didError ? 500 : 200;
         res.setHeader('Content-type', 'text/html');
         res.write('<!DOCTYPE html>');
-        startWriting();
+        stream.pipe(res);
       },
       onError(x) {
         didError = true;
@@ -58,7 +59,7 @@ module.exports = function render(url, res) {
   );
   // Abandon and switch to client rendering if enough time passes.
   // Try lowering this to see the client recover.
-  setTimeout(abort, ABORT_DELAY);
+  setTimeout(stream.abort, ABORT_DELAY);
 };
 
 // Simulate a delay caused by data fetching.
